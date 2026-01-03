@@ -109,6 +109,12 @@ bytefreezer/
 └── docs/           # Documentation
 ```
 
+## Links
+
+- **GitHub**: [github.com/bytefreezer/bytefreezer](https://github.com/bytefreezer/bytefreezer)
+- **Website**: [bytefreezer.com](https://bytefreezer.com)
+- **Documentation**: [docs.bytefreezer.com](https://docs.bytefreezer.com)
+
 ## License
 
 Elastic License 2.0 - See [LICENSE](LICENSE) for details.
