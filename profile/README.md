@@ -9,24 +9,29 @@ ByteFreezer collects, processes, and stores machine data at scale. It ingests lo
 ## Architecture
 
 ```
-Data Sources                    ByteFreezer Platform                         Storage & Query
-─────────────                   ────────────────────                         ───────────────
+Data Sources              ByteFreezer Platform                      Storage & Query
+────────────              ────────────────────                      ───────────────
 
-  Syslog      ┐                 ┌─────────┐
-  Filebeat    ├──── UDP ───────►│  Proxy  │────┐
-  Agents      ┘                 └─────────┘    │
-                                               ▼
-  Webhooks    ─── HTTP POST ──►┌──────────┐   S3      ┌───────┐    Parquet
-  APIs                         │ Receiver │──────────►│ Piper │───────────►┌────────┐
-  Custom      ─────────────────►└──────────┘          └───────┘            │ Packer │
-                                                          │                └────────┘
-                                                          ▼                     │
-                                               ┌─────────────────────┐          │
-                                               │  Transformations    │          ▼
-                                               │  - Field extraction │    ┌───────────┐
-                                               │  - GeoIP enrichment │    │  Query    │
-                                               │  - Custom parsing   │    │  Engine   │
-                                               └─────────────────────┘    └───────────┘
+  Syslog     ┐            ┌─────────┐
+  Filebeat   ├── UDP ────►│  Proxy  │───┐
+  Agents     ┘            └─────────┘   │
+                                        ▼
+  Webhooks   ── HTTP ───────────────►┌──────────┐      ┌───────┐      ┌────────┐
+  APIs                               │ Receiver │─────►│ Piper │─────►│ Packer │
+                                     └──────────┘      └───────┘      └────────┘
+                                           │               │               │
+                                           ▼               ▼               ▼
+                                     ┌─────────────────────────────────────────┐
+                                     │                   S3                    │
+                                     │  intake/    │    piper/    │   packer/  │
+                                     │  (raw)      │  (processed) │  (parquet) │
+                                     └─────────────────────────────────────────┘
+                                                                         │
+                                                                         ▼
+                                                                   ┌───────────┐
+                                                                   │   Query   │
+                                                                   │  Engine   │
+                                                                   └───────────┘
 ```
 
 ## Components
@@ -39,7 +44,7 @@ Data Sources                    ByteFreezer Platform                         Sto
 | **Receiver** | Ingestion endpoint. Accepts HTTP webhooks, validates data, stores raw events to S3. |
 | **Piper** | Processing engine. Applies transformations, parsing, and enrichment to raw data. |
 | **Packer** | Storage optimizer. Compacts processed data into Parquet files for efficient querying. |
-| **Query** | Analytics engine. Executes SQL queries against Parquet data via DuckDB. |
+| **Query** | Reference analytics engine. Example implementation using DuckDB - customize to your needs. |
 
 ### Subscription Service
 
@@ -54,19 +59,29 @@ Data Sources                    ByteFreezer Platform                         Sto
 - **Flexible Ingestion** - UDP, syslog, HTTP webhooks, and custom protocols
 - **Configurable Pipelines** - Transform, parse, and enrich data with tenant-specific rules
 - **Columnar Storage** - Parquet format with Snappy compression for 10-50x size reduction
-- **SQL Queries** - Standard SQL interface powered by DuckDB
 - **Multi-Tenant** - Isolated data processing with per-tenant configuration
 - **S3-Native** - Works with any S3-compatible storage (AWS S3, MinIO, etc.)
+
+## Data Output
+
+ByteFreezer outputs data as **Parquet files** - an open columnar format supported by most analytics tools. Use the data with systems you already have:
+
+- **Data Warehouses** - Snowflake, BigQuery, Redshift, Databricks
+- **Query Engines** - Trino, Presto, Apache Spark, DuckDB
+- **BI Tools** - Tableau, Power BI, Grafana, Superset
+- **Data Lakes** - Delta Lake, Apache Iceberg, Apache Hudi
+
+The included Query component is a reference implementation. Customize it or integrate Parquet output directly into your existing analytics stack.
 
 ## Deployment Options
 
 ### Managed (Subscription)
-Fully hosted solution. Data processing infrastructure managed by ByteFreezer with access to the Control plane and web UI. Contact [sales@bytefreezer.com](mailto:sales@bytefreezer.com) for pricing.
+Fully hosted solution. **ByteFreezer provides the compute infrastructure** - we run and scale all data processing components (proxy, receiver, piper, packer, query) on your behalf. Includes access to Control plane and web UI. Contact [sales@bytefreezer.com](mailto:sales@bytefreezer.com) for pricing.
 
-### On-Premises
-Deploy data processing components in your own infrastructure using Helm charts. Components connect to the ByteFreezer Control service for configuration, coordination, and monitoring.
+### On-Premises (Subscription)
+**You provide the compute infrastructure** - deploy data processing components in your own Kubernetes cluster or servers. Components connect to ByteFreezer Control service for configuration, coordination, and monitoring. Your data stays in your environment.
 
-**Requires a ByteFreezer subscription** for Control service access.
+Both options require a ByteFreezer subscription for Control service access.
 
 ```bash
 helm install bytefreezer ./helm/bytefreezer \
