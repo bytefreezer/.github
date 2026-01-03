@@ -53,6 +53,10 @@ Data Sources              ByteFreezer Platform                      Storage & Qu
 | **Control** | Management plane. Configuration, coordination, health monitoring, multi-tenant API. |
 | **UI** | Web interface. Dashboards, query builder, data exploration, and administration. |
 
+## Agentic Configuration
+
+Setting up data pipelines is effortless with ByteFreezer's AI-powered configurators. Describe your data source in plain language - the agentic system analyzes sample data, detects formats, and automatically generates parsing rules, field mappings, and transformations. No regex expertise required. The configurator learns from your feedback and continuously improves extraction accuracy.
+
 ## Key Features
 
 - **High Throughput** - Handle millions of events per second with horizontal scaling
