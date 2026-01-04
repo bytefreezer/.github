@@ -13,11 +13,11 @@ Data Sources              ByteFreezer Platform                      Storage & Qu
 ────────────              ────────────────────                      ───────────────
 
   Syslog     ┐            ┌─────────┐
-  Filebeat   ├── UDP ────►│  Proxy  │───┐
-  Agents     ┘            └─────────┘   │
+  Filebeat   ├── UDP/TCP─►│  Proxy  │───┐
+  Agents     ┘            └─────────┘   HTTPs
                                         ▼
-  Webhooks   ── HTTP ───────────────►┌──────────┐      ┌───────┐      ┌────────┐
-  APIs                               │ Receiver │─────►│ Piper │─────►│ Packer │
+                                     ┌──────────┐      ┌───────┐      ┌────────┐
+                                     │ Receiver │─────►│ Piper │─────►│ Packer │
                                      └──────────┘      └───────┘      └────────┘
                                            │               │               │
                                            ▼               ▼               ▼
