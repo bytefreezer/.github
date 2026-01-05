@@ -105,7 +105,7 @@ bytefreezer/
 ├── piper/          # Data processing pipeline
 ├── packer/         # Parquet file generator
 ├── query/          # SQL query engine
-├── helm/           # Kubernetes deployment
+├── installer/      # Deployment scripts
 └── docs/           # Documentation
 ```
 
