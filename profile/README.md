@@ -1,10 +1,8 @@
 # ByteFreezer
 
-High-performance data ingestion and analytics platform for log and telemetry data.
+Cut your SIEM bill 80-90%. Keep all your data.
 
-## What is ByteFreezer?
-
-ByteFreezer collects, processes, and stores machine data at scale. It ingests logs and telemetry from any source, transforms them through configurable pipelines, and stores them in an optimized columnar format for fast querying.
+ByteFreezer sits before your SIEM. Stores everything as Parquet on your infrastructure. Forwards only what matters.
 
 ## Architecture
 
@@ -13,11 +11,11 @@ Data Sources              ByteFreezer Platform                      Storage & Qu
 ────────────              ────────────────────                      ───────────────
 
   Syslog     ┐            ┌─────────┐
-  Filebeat   ├── UDP/TCP─►│  Proxy  │───┐
-  Agents     ┘            └─────────┘   HTTPs
+  Filebeat   ├── UDP ────►│  Proxy  │───┐
+  Agents     ┘            └─────────┘   │
                                         ▼
-                                     ┌──────────┐      ┌───────┐      ┌────────┐
-                                     │ Receiver │─────►│ Piper │─────►│ Packer │
+  Webhooks   ── HTTP ───────────────►┌──────────┐      ┌───────┐      ┌────────┐
+  APIs                               │ Receiver │─────►│ Piper │─────►│ Packer │
                                      └──────────┘      └───────┘      └────────┘
                                            │               │               │
                                            ▼               ▼               ▼
@@ -36,7 +34,7 @@ Data Sources              ByteFreezer Platform                      Storage & Qu
 
 ## Components
 
-### Open Source (This Repository)
+### Data Plane (Open Source — Apache 2.0)
 
 | Component | Description |
 |-----------|-------------|
@@ -44,59 +42,49 @@ Data Sources              ByteFreezer Platform                      Storage & Qu
 | **Receiver** | Ingestion endpoint. Accepts HTTP webhooks, validates data, stores raw events to S3. |
 | **Piper** | Processing engine. Applies transformations, parsing, and enrichment to raw data. |
 | **Packer** | Storage optimizer. Compacts processed data into Parquet files for efficient querying. |
-| **Query** | Reference analytics engine. Example implementation using DuckDB - customize to your needs. |
+| **Query** | Reference analytics engine using DuckDB — customize to your needs. |
 
-### Subscription Service
+### Control Plane
 
 | Component | Description |
 |-----------|-------------|
 | **Control** | Management plane. Configuration, coordination, health monitoring, multi-tenant API. |
-| **UI** | Web interface. Dashboards, query builder, data exploration, and administration. |
+| **UI** | Web interface. Dashboards, configuration, data exploration, and administration. |
 
-## Agentic Configuration
+## How It Works
 
-Setting up data pipelines is effortless with ByteFreezer's AI-powered configurators. Describe your data source in plain language - the agentic system analyzes sample data, detects formats, and automatically generates parsing rules, field mappings, and transformations. No regex expertise required. The configurator learns from your feedback and continuously improves extraction accuracy.
+1. Data flows toward your SIEM
+2. ByteFreezer intercepts. Stores everything as Parquet.
+3. Only what you choose gets forwarded to the SIEM.
 
-## Key Features
+Filter eBPF to IO operations. Send only password changes. Route only critical alerts. The rest stays in Parquet — queryable, compliant, nearly free.
 
-- **High Throughput** - Handle millions of events per second with horizontal scaling
-- **Flexible Ingestion** - UDP, syslog, HTTP webhooks, and custom protocols
-- **Configurable Pipelines** - Transform, parse, and enrich data with tenant-specific rules
-- **Columnar Storage** - Parquet format with Snappy compression for 10-50x size reduction
-- **Multi-Tenant** - Isolated data processing with per-tenant configuration
-- **S3-Native** - Works with any S3-compatible storage (AWS S3, MinIO, etc.)
+## AI Configuration
+
+Describe what you need in plain English. MCP gives AI full knowledge of your deployment. Pipeline configs built in minutes, not months.
 
 ## Data Output
 
-ByteFreezer outputs data as **Parquet files** - an open columnar format supported by most analytics tools. Use the data with systems you already have:
+ByteFreezer outputs data as **Parquet files** — an open columnar format supported by most analytics tools:
 
-- **Data Warehouses** - Snowflake, BigQuery, Redshift, Databricks
-- **Query Engines** - Trino, Presto, Apache Spark, DuckDB
-- **BI Tools** - Tableau, Power BI, Grafana, Superset
-- **Data Lakes** - Delta Lake, Apache Iceberg, Apache Hudi
+- **Query Engines** — DuckDB, Trino, Presto, Apache Spark
+- **Data Warehouses** — Snowflake, BigQuery, Redshift, Databricks
+- **BI Tools** — Tableau, Power BI, Grafana, Superset
+- **Data Lakes** — Delta Lake, Apache Iceberg, Apache Hudi
 
-The included Query component is a reference implementation. Customize it or integrate Parquet output directly into your existing analytics stack.
+## Pricing
 
-## Deployment Options
+| Tier | Cost | Details |
+|------|------|---------|
+| **Free** | $0 | 1 proxy, 1 tenant, 1 dataset. Full control plane, no expiration. |
+| **Self-Service** | $400/proxy/mo | Unlimited proxies, tenants, datasets. Email support. |
+| **White Glove** | Flat onboarding + retainer | Dedicated expert deployment and ongoing optimization. |
 
-### Managed (Subscription)
-Fully hosted solution. **ByteFreezer provides the compute infrastructure** - we run and scale all data processing components (proxy, receiver, piper, packer, query) on your behalf. Includes access to Control plane and web UI. Contact [sales@bytefreezer.com](mailto:sales@bytefreezer.com) for pricing.
+## Deployment
 
-### On-Premises (Subscription)
-**You provide the compute infrastructure** - deploy data processing components in your own Kubernetes cluster or servers. Components connect to ByteFreezer Control service for configuration, coordination, and monitoring. Your data stays in your environment.
+Your infrastructure. Your data never touches a third party.
 
-Both options require a ByteFreezer subscription for Control service access.
-
-```bash
-helm install bytefreezer ./helm/bytefreezer \
-  --set minio.enabled=true \
-  --set controlService.url=https://api.bytefreezer.com \
-  --set controlService.apiKey=YOUR_API_KEY
-```
-
-See [Helm Chart Documentation](./helm/bytefreezer/README.md) for full deployment guide.
-
-## Repository Structure
+Deploy the data plane on your servers, Kubernetes, Docker, or systemd. The control plane provides configuration and health monitoring.
 
 ```
 bytefreezer/
@@ -105,16 +93,18 @@ bytefreezer/
 ├── piper/          # Data processing pipeline
 ├── packer/         # Parquet file generator
 ├── query/          # SQL query engine
-├── installer/      # Deployment scripts
 └── docs/           # Documentation
 ```
 
 ## Links
 
-- **GitHub**: [github.com/bytefreezer/bytefreezer](https://github.com/bytefreezer/bytefreezer)
 - **Website**: [bytefreezer.com](https://bytefreezer.com)
 - **Documentation**: [docs.bytefreezer.com](https://docs.bytefreezer.com)
+- **GitHub**: [github.com/bytefreezer](https://github.com/bytefreezer)
+- **For CISOs**: [bytefreezer.com/ciso](https://bytefreezer.com/ciso)
+- **For Operators**: [bytefreezer.com/operators](https://bytefreezer.com/operators)
+- **Contact**: [bytefreezer.com/contact](https://bytefreezer.com/contact)
 
 ## License
 
-Elastic License 2.0 - See [LICENSE](LICENSE) for details.
+Data plane components (proxy, receiver, piper, packer) are licensed under Apache 2.0. See [LICENSE](LICENSE) for details.
