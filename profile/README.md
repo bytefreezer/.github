@@ -2,7 +2,7 @@
 
 Cut your SIEM bill 80-90%. Keep all your data.
 
-ByteFreezer sits before your SIEM. Stores everything as Parquet on your infrastructure. Forwards only what matters.
+ByteFreezer sits before your SIEM. Stores everything as Parquet on your infrastructure. Forward what you need, now or later.
 
 ## Architecture
 
@@ -57,7 +57,7 @@ Data Sources              ByteFreezer Platform                      Storage & Qu
 2. ByteFreezer intercepts. Stores everything as Parquet.
 3. Only what you choose gets forwarded to the SIEM.
 
-Filter eBPF to IO operations. Send only password changes. Route only critical alerts. The rest stays in Parquet — queryable, compliant, nearly free.
+Example filter chatty eBPF to IO operations. Send only password changes. Route only critical alerts. The rest stays in Parquet — queryable, compliant, nearly free.
 
 ## AI Configuration
 
