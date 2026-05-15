@@ -4,6 +4,24 @@ Cut your SIEM bill 80-90%. Keep all your data.
 
 ByteFreezer sits before your SIEM. Stores everything as Parquet on your infrastructure. Forward what you need, now or later.
 
+## Quickstart
+
+The fastest way to try ByteFreezer is with [Claude Code](https://docs.anthropic.com/en/docs/claude-code) and our MCP server — describe what you want in plain English and Claude provisions accounts, generates configs, deploys the stack, and verifies the pipeline end to end.
+
+1. Sign up at [bytefreezer.com](https://bytefreezer.com) and grab an [API key](https://bytefreezer.com/dashboard/api-keys).
+2. Add the ByteFreezer MCP server to Claude Code:
+
+   ```bash
+   claude mcp add --transport http bytefreezer \
+     https://mcp.bytefreezer.com/mcp \
+     --header "Authorization: Bearer YOUR_BYTEFREEZER_API_KEY"
+   ```
+
+3. Restart your Claude Code session, then ask: *"please see if bytefreezer mcp is accessible"*.
+4. Pick a guide from the [installer](https://github.com/bytefreezer/installer) — Docker Compose, Kubernetes, HA Kubernetes, or a Managed Proxy — and Claude takes it from there.
+
+Prefer to drive manually? Every guide is a plain Markdown runbook with the same steps Claude follows.
+
 ## Architecture
 
 ```
@@ -34,7 +52,9 @@ Data Sources              ByteFreezer Platform                      Storage & Qu
 
 ## Components
 
-### Data Plane (Open Source — Apache 2.0)
+All components are open source under Apache 2.0.
+
+### Data Plane
 
 | Component | Description |
 |-----------|-------------|
@@ -107,4 +127,4 @@ bytefreezer/
 
 ## License
 
-Data plane components (proxy, receiver, piper, packer) are licensed under Apache 2.0. See [LICENSE](LICENSE) for details.
+All ByteFreezer components are licensed under Apache 2.0. See each component's `LICENSE` file for details.
