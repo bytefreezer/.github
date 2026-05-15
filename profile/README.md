@@ -8,8 +8,12 @@ ByteFreezer sits before your SIEM. Stores everything as Parquet on your infrastr
 
 The fastest way to try ByteFreezer is with [Claude Code](https://docs.anthropic.com/en/docs/claude-code) and our MCP server — describe what you want in plain English and Claude provisions accounts, generates configs, deploys the stack, and verifies the pipeline end to end.
 
+**Want to see it working without standing up infrastructure?** Use the **managed demo path** — you only deploy the proxy on a host that can receive your tapped traffic, we host receiver, piper, packer, control, storage, and the dashboard. Data shows up in the UI a few minutes after the proxy starts. See [Managed Quickstart](https://github.com/bytefreezer/installer/blob/main/docs/guide-managed.md).
+
+**Prerequisites:** [install Claude Code](https://docs.anthropic.com/en/docs/claude-code/quickstart) (`npm install -g @anthropic-ai/claude-code` or follow the platform instructions), then:
+
 1. Sign up at [bytefreezer.com](https://bytefreezer.com) and grab an [API key](https://bytefreezer.com/dashboard/api-keys).
-2. Add the ByteFreezer MCP server to Claude Code:
+2. Add the ByteFreezer MCP server to Claude Code. Run this in any terminal where the `claude` CLI is on your PATH — it edits your `~/.claude.json` so subsequent sessions can call our MCP tools. (See [Claude Code MCP docs](https://docs.anthropic.com/en/docs/claude-code/mcp) for background.)
 
    ```bash
    claude mcp add --transport http bytefreezer \
@@ -18,7 +22,7 @@ The fastest way to try ByteFreezer is with [Claude Code](https://docs.anthropic.
    ```
 
 3. Restart your Claude Code session, then ask: *"please see if bytefreezer mcp is accessible"*.
-4. Pick a guide from the [installer](https://github.com/bytefreezer/installer) — Docker Compose, Kubernetes, HA Kubernetes, or a Managed Proxy — and Claude takes it from there.
+4. Pick a guide from the [installer](https://github.com/bytefreezer/installer) — [Managed Quickstart](https://github.com/bytefreezer/installer/blob/main/docs/guide-managed.md) (proxy only), [Docker Compose](https://github.com/bytefreezer/installer/blob/main/docs/guide-onprem-docker.md), [Kubernetes](https://github.com/bytefreezer/installer/blob/main/docs/guide-onprem-k8s.md), or [HA Kubernetes](https://github.com/bytefreezer/installer/blob/main/docs/guide-onprem-k8s-ha.md) — and Claude takes it from there.
 
 Prefer to drive manually? Every guide is a plain Markdown runbook with the same steps Claude follows.
 
@@ -58,7 +62,7 @@ All components are open source under Apache 2.0.
 
 | Component | Description |
 |-----------|-------------|
-| **Proxy** | Edge collector. Receives data via UDP/syslog, batches, compresses, and forwards to Receiver. |
+| **Proxy** | The ingest point. Sits where you tap or mirror your traffic — SPAN/TAP ports, syslog relays, agent forwarders, webhooks — and is the only component that *needs* to live near your data. Batches, compresses, and forwards to Receiver. Everything downstream runs wherever you want (your own infra, or our managed stack). |
 | **Receiver** | Ingestion endpoint. Accepts HTTP webhooks, validates data, stores raw events to S3. |
 | **Piper** | Processing engine. Applies transformations, parsing, and enrichment to raw data. |
 | **Packer** | Storage optimizer. Compacts processed data into Parquet files for efficient querying. |
